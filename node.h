@@ -36,7 +36,13 @@ public:
 	node *link() {return link_field;}
 	
 private:
-void sort_list(node*& head_ptr);
+
+value_type data_field;
+node *link_field;
 };
+
+void sort_list(node*& head_ptr);
+void list_remove(node *previous_ptr);
+void list_insert(node *previous_ptr, const node::value_type &entry);
 
 #endif
