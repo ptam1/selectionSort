@@ -1,51 +1,134 @@
 #include "node.h"
+#include <cassert>    // Provides assert
+#include <cstdlib>    // Provides NULL and size_t
 #include <iostream>
 
-node::~node()
-{
-	delete [] this->link_field;
-}
+using namespace std;
 
 
-/*Precondition: head_ptr is a head pointer of a linked 
-list of items and these items can be compared with a < operator.
-Postcondition: head_ptr points to the head of a linked list with
-exactly the same entries, but the entries in this list are sorted from 
-smallest to largest. The original linked list is nol longer available. 
-*/
-void sort_list(node*& head_ptr)
-{
-	node* largest;
-	node* current;
-	node* previous;
-	
-	current = head_ptr;
-	while(current != NULL)
-	{
-		if(current < largest)
-		{
-			largest = current;
-		}
-		previous = current;
-		list_remove(largest);
-		list_insert(previous, largest);
-		current = head_ptr->link();
-	}
-}
+    size_t list_length(const node *head_ptr)
+    // Library facilities used: cstdlib
+    {
+        const node *cursor;
+        size_t answer;
 
-void list_remove(node *previous_ptr) 
-{
+        answer = 0;
+        for (cursor = head_ptr; cursor != NULL; cursor = cursor->link())
+            ++answer;
+
+        return answer;
+    }
+
+    void list_head_insert(node *&head_ptr, const node::value_type &entry) {
+        head_ptr = new node(entry, head_ptr);
+    }
+
+    void list_insert(node *previous_ptr, const node::value_type &entry) {
+        node *insert_ptr;
+
+        insert_ptr = new node(entry, previous_ptr->link());
+        previous_ptr->set_link(insert_ptr);
+    }
+
+    node *list_search(node *head_ptr, const node::value_type &target)
+    // Library facilities used: cstdlib
+    {
+        node *cursor;
+
+        for (cursor = head_ptr; cursor != NULL; cursor = cursor->link())
+            if (target == cursor->data())
+                return cursor;
+        return NULL;
+    }
+
+    const node *list_search(const node *head_ptr, const node::value_type &target)
+    // Library facilities used: cstdlib
+    {
+        const node *cursor;
+
+        for (cursor = head_ptr; cursor != NULL; cursor = cursor->link())
+            if (target == cursor->data())
+                return cursor;
+        return NULL;
+    }
+
+    node *list_locate(node *head_ptr, size_t position)
+    // Library facilities used: cassert, cstdlib
+    {
+        node *cursor;
+        size_t i;
+
+        assert (0 < position);
+        cursor = head_ptr;
+        for (i = 1; (i < position) && (cursor != NULL); i++)
+            cursor = cursor->link();
+        return cursor;
+    }
+
+    const node *list_locate(const node *head_ptr, size_t position)
+    // Library facilities used: cassert, cstdlib
+    {
+        const node *cursor;
+        size_t i;
+
+        assert (0 < position);
+        cursor = head_ptr;
+        for (i = 1; (i < position) && (cursor != NULL); i++)
+            cursor = cursor->link();
+        return cursor;
+    }
+
+    void list_head_remove(node *&head_ptr) {
+        node *remove_ptr;
+
+        remove_ptr = head_ptr;
+        head_ptr = head_ptr->link();
+        delete remove_ptr;
+    }
+
+    void list_remove(node *previous_ptr) {
         node *remove_ptr;
 
         remove_ptr = previous_ptr->link();
         previous_ptr->set_link(remove_ptr->link());
         delete remove_ptr;
+    }
+
+    void list_clear(node *&head_ptr)
+    // Library facilities used: cstdlib
+    {
+        while (head_ptr != NULL)
+            list_head_remove(head_ptr);
+    }
+
+    void list_copy(const node *source_ptr, node *&head_ptr, node *&tail_ptr)
+    // Library facilities used: cstdlib
+    {
+        head_ptr = NULL;
+        tail_ptr = NULL;
+
+        // Handle the case of the empty list.
+        if (source_ptr == NULL)
+            return;
+
+        // Make the head node for the newly created list, and put data in it.
+        list_head_insert(head_ptr, source_ptr->data());
+        tail_ptr = head_ptr;
+
+        // Copy the rest of the nodes one at a time, adding at the tail of new list.
+        source_ptr = source_ptr->link();
+        while (source_ptr != NULL) {
+            list_insert(tail_ptr, source_ptr->data());
+            tail_ptr = tail_ptr->link();
+            source_ptr = source_ptr->link();
+        }
 }
 
-void list_insert(node *previous_ptr, const node::value_type &entry)
+void print(node* head_ptr)
 {
-        node *insert_ptr;
-
-        insert_ptr = new node(entry, previous_ptr->link());
-        previous_ptr->set_link(insert_ptr);
+	cout << "The Original List is: " << " ";
+	for(node* i = head_ptr; i != NULL; i = i->link())
+	{
+		cout << i->data() << " " << " ";
+	}
 }
